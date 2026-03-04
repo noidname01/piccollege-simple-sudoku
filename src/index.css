@@ -1,0 +1,13 @@
+@import "tailwindcss";
+
+.sudoku-cell {
+  transition: background-color 0.2s;
+}
+
+.sudoku-cell:focus {
+  background-color: #e3f2fd !important;
+}
+
+.sudoku-cell:read-only:focus {
+  background-color: #e0e0e0 !important;
+}

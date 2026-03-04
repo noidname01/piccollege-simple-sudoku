@@ -1,0 +1,5 @@
+{
+  "name": "Sudoku Game",
+  "description": "A single-player Sudoku game built with React and Material UI.",
+  "requestFramePermissions": []
+}
