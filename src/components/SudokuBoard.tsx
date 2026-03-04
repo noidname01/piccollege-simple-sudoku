@@ -4,6 +4,17 @@ import { Box, Button, Typography, Paper, Snackbar, Alert } from '@mui/material';
 import FavoriteIcon from '@mui/icons-material/Favorite';
 import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
 
+const getEmptyCellCount = (): number => {
+  const minEnv = import.meta.env.VITE_SUDOKU_EMPTY_CELLS_MIN;
+  const maxEnv = import.meta.env.VITE_SUDOKU_EMPTY_CELLS_MAX;
+
+  const min = minEnv ? parseInt(minEnv, 10) : 27;
+  const max = maxEnv ? parseInt(maxEnv, 10) : 60;
+
+  // Random number between min and max (inclusive)
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+};
+
 export default function SudokuBoard() {
   const [board, setBoard] = useState<number[][]>([]);
   const [initialBoard, setInitialBoard] = useState<number[][]>([]);
@@ -14,7 +25,8 @@ export default function SudokuBoard() {
   const [isGameOver, setIsGameOver] = useState(false);
 
   const initGame = () => {
-    const { puzzle, solution: solved } = generateSudoku(45);
+    const emptyCells = getEmptyCellCount();
+    const { puzzle, solution: solved } = generateSudoku(emptyCells);
     setBoard(puzzle.map(row => [...row]));
     setInitialBoard(puzzle.map(row => [...row]));
     setSolution(solved);
