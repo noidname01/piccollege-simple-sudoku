@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { getCloudflareContext } from '@opennextjs/cloudflare';
 import { getLeaderboard } from '@/lib/gameStore';
 import { Difficulty } from '@/lib/constants';
 
@@ -15,6 +16,7 @@ export async function GET(req: NextRequest) {
     );
   }
 
-  const entries = getLeaderboard(difficulty ?? undefined);
+  const { env } = getCloudflareContext();
+  const entries = await getLeaderboard(env.SUDOKU_KV, difficulty ?? undefined);
   return NextResponse.json({ entries });
 }

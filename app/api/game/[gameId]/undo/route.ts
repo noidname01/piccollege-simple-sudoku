@@ -1,10 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { getCloudflareContext } from '@opennextjs/cloudflare';
 import { undo } from '@/lib/gameStore';
 
 export async function POST(_req: NextRequest, { params }: { params: Promise<{ gameId: string }> }) {
   const { gameId } = await params;
 
-  const result = undo(gameId);
+  const { env } = getCloudflareContext();
+  const result = await undo(env.SUDOKU_KV, gameId);
   if ('error' in result) {
     return NextResponse.json({ error: result.error }, { status: result.status });
   }
