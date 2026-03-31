@@ -61,60 +61,70 @@ export default function NumberPad() {
       {/* Action buttons - compact toolbar */}
       <Box display="flex" gap={1} alignItems="center">
         <Tooltip title={`Notes ${noteMode ? 'ON' : 'OFF'}`}>
-          <IconButton
-            onClick={toggleNoteMode}
-            disabled={completed}
-            sx={{
-              backgroundColor: noteMode ? '#9333ea' : 'transparent',
-              color: noteMode ? '#fff' : '#9333ea',
-              border: '1.5px solid',
-              borderColor: '#d8b4fe',
-              borderRadius: '10px',
-              '&:hover': { backgroundColor: noteMode ? '#7e22ce' : '#f3e8ff' },
-            }}
-          >
-            <EditNoteIcon fontSize="small" />
-          </IconButton>
+          <span>
+            <IconButton
+              onClick={toggleNoteMode}
+              disabled={completed}
+              sx={{
+                backgroundColor: noteMode ? '#9333ea' : 'transparent',
+                color: noteMode ? '#fff' : '#9333ea',
+                border: '1.5px solid',
+                borderColor: '#d8b4fe',
+                borderRadius: '10px',
+                '&:hover': { backgroundColor: noteMode ? '#7e22ce' : '#f3e8ff' },
+              }}
+            >
+              <EditNoteIcon fontSize="small" />
+            </IconButton>
+          </span>
         </Tooltip>
 
         <Tooltip title="Undo (Ctrl+Z)">
-          <IconButton
-            onClick={handleUndo}
-            disabled={completed}
-            sx={{ color: '#9333ea', border: '1.5px solid #d8b4fe', borderRadius: '10px', '&:hover': { backgroundColor: '#f3e8ff' } }}
-          >
-            <UndoIcon fontSize="small" />
-          </IconButton>
+          <span>
+            <IconButton
+              onClick={handleUndo}
+              disabled={completed}
+              sx={{ color: '#9333ea', border: '1.5px solid #d8b4fe', borderRadius: '10px', '&:hover': { backgroundColor: '#f3e8ff' } }}
+            >
+              <UndoIcon fontSize="small" />
+            </IconButton>
+          </span>
         </Tooltip>
 
         <Tooltip title="Redo (Ctrl+Shift+Z)">
-          <IconButton
-            onClick={handleRedo}
-            disabled={completed}
-            sx={{ color: '#9333ea', border: '1.5px solid #d8b4fe', borderRadius: '10px', '&:hover': { backgroundColor: '#f3e8ff' } }}
-          >
-            <RedoIcon fontSize="small" />
-          </IconButton>
+          <span>
+            <IconButton
+              onClick={handleRedo}
+              disabled={completed}
+              sx={{ color: '#9333ea', border: '1.5px solid #d8b4fe', borderRadius: '10px', '&:hover': { backgroundColor: '#f3e8ff' } }}
+            >
+              <RedoIcon fontSize="small" />
+            </IconButton>
+          </span>
         </Tooltip>
 
         <Tooltip title="Hint (adds penalty)">
-          <IconButton
-            onClick={() => setHintDialogOpen(true)}
-            disabled={completed}
-            sx={{ color: '#f59e0b', border: '1.5px solid #fde68a', borderRadius: '10px', '&:hover': { backgroundColor: '#fefce8' } }}
-          >
-            <LightbulbOutlinedIcon fontSize="small" />
-          </IconButton>
+          <span>
+            <IconButton
+              onClick={() => setHintDialogOpen(true)}
+              disabled={completed}
+              sx={{ color: '#f59e0b', border: '1.5px solid #fde68a', borderRadius: '10px', '&:hover': { backgroundColor: '#fefce8' } }}
+            >
+              <LightbulbOutlinedIcon fontSize="small" />
+            </IconButton>
+          </span>
         </Tooltip>
 
         <Tooltip title="Clear cell">
-          <IconButton
-            onClick={handleClear}
-            disabled={!selectedCell || completed}
-            sx={{ color: '#dc2626', border: '1.5px solid #fecaca', borderRadius: '10px', '&:hover': { backgroundColor: '#fef2f2' } }}
-          >
-            <BackspaceOutlinedIcon fontSize="small" />
-          </IconButton>
+          <span>
+            <IconButton
+              onClick={handleClear}
+              disabled={!selectedCell || completed}
+              sx={{ color: '#dc2626', border: '1.5px solid #fecaca', borderRadius: '10px', '&:hover': { backgroundColor: '#fef2f2' } }}
+            >
+              <BackspaceOutlinedIcon fontSize="small" />
+            </IconButton>
+          </span>
         </Tooltip>
 
         <Button

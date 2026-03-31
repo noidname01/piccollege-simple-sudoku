@@ -5,8 +5,9 @@ import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import { useGame, formatTime } from '@/contexts/GameContext';
 
 export default function Timer() {
-  const { elapsedSeconds, totalPenalty, completed, penaltyFlash } = useGame();
-  const displayTime = elapsedSeconds + totalPenalty;
+  const { elapsedSeconds, totalPenalty, completed, finalTime, penaltyFlash } = useGame();
+  // When completed, use the server's authoritative finalTime to avoid 1s drift
+  const displayTime = (completed && finalTime != null) ? Math.round(finalTime) : elapsedSeconds + totalPenalty;
 
   return (
     <Box
