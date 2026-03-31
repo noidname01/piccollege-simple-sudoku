@@ -16,7 +16,6 @@ export interface GameSession {
   difficulty: Difficulty;
   puzzle: number[][];      // The original puzzle (immutable, used to prevent editing given cells)
   board: number[][];       // Current board state with user entries
-  solution: number[][];    // The full correct solution (never sent to client)
   startTime: number;
   totalPenalty: number;
   completed: boolean;
@@ -64,9 +63,4 @@ export function getEmptyCells(difficulty: Difficulty): number {
 export function getPenaltySeconds(): number {
   const envVal = process.env['SUDOKU_PENALTY_SECONDS'];
   return envVal ? parseInt(envVal, 10) : 30;
-}
-
-export function getHintPenaltySeconds(): number {
-  const envVal = process.env['SUDOKU_HINT_PENALTY_SECONDS'];
-  return envVal ? parseInt(envVal, 10) : 60;
 }

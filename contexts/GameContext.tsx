@@ -4,7 +4,7 @@ import { createContext, useContext, useState, useEffect, useRef, useCallback, Re
 import axios from 'axios';
 import { Difficulty } from '@/lib/constants';
 import { LeaderboardEntry } from '@/lib/config';
-import { createGame as apiCreateGame, makeMove, clearCell as apiClearCell, undoMove as apiUndo, redoMove as apiRedo, getHint as apiHint, getLeaderboard } from '@/services/api';
+import { createGame as apiCreateGame, makeMove, clearCell as apiClearCell, undoMove as apiUndo, redoMove as apiRedo, getLeaderboard } from '@/services/api';
 
 export function formatTime(seconds: number): string {
   const mins = Math.floor(seconds / 60);
@@ -35,7 +35,6 @@ interface GameActions {
   handleClear: () => Promise<void>;
   handleUndo: () => Promise<void>;
   handleRedo: () => Promise<void>;
-  handleHint: () => Promise<void>;
   handleCellClick: (row: number, col: number) => void;
   handleNewGame: () => void;
   toggleNoteMode: () => void;
@@ -220,28 +219,6 @@ export function GameProvider({ children }: { children: ReactNode }) {
     }
   }, [gameId, completed, board]);
 
-  const handleHint = useCallback(async () => {
-    if (!gameId || completed) return;
-    try {
-      const result = await apiHint(gameId);
-      const newBoard = board.map(r => [...r]);
-      newBoard[result.row][result.col] = result.value;
-      setBoard(newBoard);
-      setTotalPenalty(result.totalPenalty);
-      setPenaltyFlash('+' + result.penalty + 's (hint)');
-      setTimeout(() => setPenaltyFlash(null), 2000);
-      if (result.completed && result.finalTime != null) {
-        setCompleted(true);
-        setFinalTime(result.finalTime);
-        setSelectedCell(null);
-        if (difficulty) fetchLeaderboard(difficulty);
-      }
-    } catch (err: unknown) {
-      const message = axios.isAxiosError(err) ? err.response?.data?.error : 'No hints available.';
-      setErrorMsg(message || 'No hints available.');
-    }
-  }, [gameId, completed, board, difficulty]);
-
   // Keyboard support
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -293,7 +270,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
     elapsedSeconds, totalPenalty, completed, finalTime,
     errorMsg, penaltyFlash, selectedCell, leaderboardData,
     notes, noteMode,
-    startGame, handleNumberInput, handleClear, handleUndo, handleRedo, handleHint,
+    startGame, handleNumberInput, handleClear, handleUndo, handleRedo,
     handleCellClick, handleNewGame, toggleNoteMode, clearError,
   };
 

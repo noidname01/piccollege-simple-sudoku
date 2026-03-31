@@ -73,20 +73,6 @@ export function redoMove(gameId: string) {
   return api.post<UndoRedoResponse>(`/${gameId}/redo`).then((res) => res.data);
 }
 
-export interface HintResponse {
-  row: number;
-  col: number;
-  value: number;
-  penalty: number;
-  totalPenalty: number;
-  completed: boolean;
-  finalTime?: number;
-}
-
-export function getHint(gameId: string) {
-  return api.post<HintResponse>(`/${gameId}/hint`).then((res) => res.data);
-}
-
 export interface LeaderboardResponse {
   entries: LeaderboardEntry[];
 }

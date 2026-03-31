@@ -1,11 +1,9 @@
 'use client';
 
-import { useState } from 'react';
-import { Box, Button, IconButton, Tooltip, Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions } from '@mui/material';
+import { Box, Button, IconButton, Tooltip } from '@mui/material';
 import BackspaceOutlinedIcon from '@mui/icons-material/BackspaceOutlined';
 import UndoIcon from '@mui/icons-material/Undo';
 import RedoIcon from '@mui/icons-material/Redo';
-import LightbulbOutlinedIcon from '@mui/icons-material/LightbulbOutlined';
 import EditNoteIcon from '@mui/icons-material/EditNote';
 import ReplayIcon from '@mui/icons-material/Replay';
 import { useGame } from '@/contexts/GameContext';
@@ -17,13 +15,7 @@ const btnBase = {
 };
 
 export default function NumberPad() {
-  const { selectedCell, completed, noteMode, handleNumberInput, handleClear, handleUndo, handleRedo, handleHint, handleNewGame, toggleNoteMode } = useGame();
-  const [hintDialogOpen, setHintDialogOpen] = useState(false);
-
-  const onHintConfirm = () => {
-    setHintDialogOpen(false);
-    handleHint();
-  };
+  const { selectedCell, completed, noteMode, handleNumberInput, handleClear, handleUndo, handleRedo, handleNewGame, toggleNoteMode } = useGame();
 
   return (
     <Box display="flex" flexDirection="column" alignItems="center" gap={1.5}>
@@ -103,18 +95,6 @@ export default function NumberPad() {
           </span>
         </Tooltip>
 
-        <Tooltip title="Hint (adds penalty)">
-          <span>
-            <IconButton
-              onClick={() => setHintDialogOpen(true)}
-              disabled={completed}
-              sx={{ color: '#f59e0b', border: '1.5px solid #fde68a', borderRadius: '10px', '&:hover': { backgroundColor: '#fefce8' } }}
-            >
-              <LightbulbOutlinedIcon fontSize="small" />
-            </IconButton>
-          </span>
-        </Tooltip>
-
         <Tooltip title="Clear cell">
           <span>
             <IconButton
@@ -146,22 +126,6 @@ export default function NumberPad() {
           New Game
         </Button>
       </Box>
-
-      {/* Hint confirmation dialog */}
-      <Dialog open={hintDialogOpen} onClose={() => setHintDialogOpen(false)}>
-        <DialogTitle>Use Hint?</DialogTitle>
-        <DialogContent>
-          <DialogContentText>
-            This will reveal one cell but add a time penalty to your score. Are you sure?
-          </DialogContentText>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setHintDialogOpen(false)}>Cancel</Button>
-          <Button onClick={onHintConfirm} color="warning" variant="contained">
-            Use Hint
-          </Button>
-        </DialogActions>
-      </Dialog>
     </Box>
   );
 }

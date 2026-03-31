@@ -1,6 +1,6 @@
 import crypto from 'crypto';
 import { Difficulty } from './constants';
-import { GameSession, LeaderboardEntry, getEmptyCells, getPenaltySeconds, getHintPenaltySeconds } from './config';
+import { GameSession, LeaderboardEntry, getEmptyCells, getPenaltySeconds } from './config';
 import { generateSudoku } from './sudoku';
 
 const GAME_TTL = 86400; // 24 hours
@@ -49,17 +49,44 @@ function isValidPlacement(board: number[][], row: number, col: number, num: numb
 }
 
 /**
- * Check if the board is complete (all cells filled and matching the solution).
+ * Check if the board is a valid completed Sudoku:
+ * - All 81 cells filled (no zeros)
+ * - Every row contains 1-9 exactly once
+ * - Every column contains 1-9 exactly once
+ * - Every 3x3 box contains 1-9 exactly once
  * If complete, marks the game as finished and adds to leaderboard.
  */
 async function checkCompletion(kv: KVNamespace, game: GameSession): Promise<{ completed: true; finalTime: number } | { completed: false }> {
-  const isFull = game.board.every(r => r.every(c => c !== 0));
-  if (!isFull) return { completed: false };
+  const board = game.board;
 
-  const matchesSolution = game.board.every((row, ri) =>
-    row.every((cell, ci) => cell === game.solution[ri][ci])
-  );
-  if (!matchesSolution) return { completed: false };
+  // Check all cells are filled
+  if (!board.every(r => r.every(c => c !== 0))) return { completed: false };
+
+  // Check each row has 1-9
+  for (let r = 0; r < 9; r++) {
+    const seen = new Set(board[r]);
+    if (seen.size !== 9) return { completed: false };
+  }
+
+  // Check each column has 1-9
+  for (let c = 0; c < 9; c++) {
+    const seen = new Set<number>();
+    for (let r = 0; r < 9; r++) seen.add(board[r][c]);
+    if (seen.size !== 9) return { completed: false };
+  }
+
+  // Check each 3x3 box has 1-9
+  for (let boxR = 0; boxR < 3; boxR++) {
+    for (let boxC = 0; boxC < 3; boxC++) {
+      const seen = new Set<number>();
+      for (let r = 0; r < 3; r++) {
+        for (let c = 0; c < 3; c++) {
+          seen.add(board[boxR * 3 + r][boxC * 3 + c]);
+        }
+      }
+      if (seen.size !== 9) return { completed: false };
+    }
+  }
 
   game.completed = true;
   game.completedTime = Date.now();
@@ -80,14 +107,13 @@ async function checkCompletion(kv: KVNamespace, game: GameSession): Promise<{ co
 export async function createGame(kv: KVNamespace, difficulty: Difficulty) {
   const gameId = crypto.randomUUID();
   const emptyCount = getEmptyCells(difficulty);
-  const { puzzle, solution } = generateSudoku(emptyCount);
+  const { puzzle } = generateSudoku(emptyCount);
 
   const session: GameSession = {
     gameId,
     difficulty,
     puzzle: puzzle.map(row => [...row]),
     board: puzzle.map(row => [...row]),
-    solution,
     startTime: Date.now(),
     totalPenalty: 0,
     completed: false,
@@ -173,40 +199,6 @@ export async function redo(kv: KVNamespace, gameId: string) {
   await saveGame(kv, game);
 
   return { success: true, row: move.row, col: move.col, value: move.newValue };
-}
-
-export async function hint(kv: KVNamespace, gameId: string) {
-  const game = await getGame(kv, gameId);
-  if (!game) return { error: 'Game not found', status: 404 };
-  if (game.completed) return { error: 'Game already completed', status: 400 };
-
-  // Collect all unfilled cells
-  const emptyCells: [number, number][] = [];
-  for (let r = 0; r < 9; r++) {
-    for (let c = 0; c < 9; c++) {
-      if (game.board[r][c] === 0) emptyCells.push([r, c]);
-    }
-  }
-  if (emptyCells.length === 0) return { error: 'No empty cells to reveal', status: 400 };
-
-  // Reveal a random empty cell with the correct value
-  const [row, col] = emptyCells[Math.floor(Math.random() * emptyCells.length)];
-  const value = game.solution[row][col];
-
-  game.board[row][col] = value;
-  game.undoStack.push({ row, col, prevValue: 0, newValue: value });
-  game.redoStack = [];
-
-  const penalty = getHintPenaltySeconds();
-  game.totalPenalty += penalty;
-
-  const completionResult = await checkCompletion(kv, game);
-  await saveGame(kv, game);
-
-  if (completionResult.completed) {
-    return { row, col, value, penalty, totalPenalty: game.totalPenalty, completed: true, finalTime: completionResult.finalTime };
-  }
-  return { row, col, value, penalty, totalPenalty: game.totalPenalty, completed: false };
 }
 
 export async function getState(kv: KVNamespace, gameId: string) {
