@@ -117,10 +117,9 @@ export default function Board() {
             const borderRight = (colIndex % 3 === 2 && colIndex < 8) ? '2px solid #7e22ce' : 'none';
             const borderBottom = (rowIndex % 3 === 2 && rowIndex < 8) ? '2px solid #7e22ce' : 'none';
 
-            let bgColor = '#ffffff';
-            if (isSelected) bgColor = '#e9d5ff';
-            else if (isHighlighted) bgColor = '#faf5ff';
-            if (isInitial && !isSelected && !isHighlighted) bgColor = '#ede4ff';
+            let bgColor = isInitial ? '#ede4ff' : '#ffffff';
+            if (isSelected) bgColor = '#d8b4fe';
+            else if (isHighlighted) bgColor = isInitial ? '#e2d4f5' : '#f3e8ff';
 
             return (
               <div
