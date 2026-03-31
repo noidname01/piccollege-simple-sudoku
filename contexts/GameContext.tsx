@@ -113,6 +113,10 @@ export function GameProvider({ children }: { children: ReactNode }) {
   const handleCellClick = (row: number, col: number) => {
     if (completed) return;
     if (initialBoard[row][col] !== 0) return;
+    if (selectedCell && selectedCell[0] === row && selectedCell[1] === col) {
+      setSelectedCell(null);
+      return;
+    }
     setSelectedCell([row, col]);
   };
 
