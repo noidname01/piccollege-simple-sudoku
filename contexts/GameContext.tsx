@@ -140,16 +140,18 @@ export function GameProvider({ children }: { children: ReactNode }) {
       return;
     }
 
+    // Optimistic update: place number immediately
+    const prevValue = board[row][col];
+    const newBoard = board.map(r => [...r]);
+    newBoard[row][col] = num;
+    setBoard(newBoard);
+    const newNotes = notes.map(r => r.map(c => [...c]));
+    newNotes[row][col] = [];
+    setNotes(newNotes);
+
     try {
       const result = await makeMove(gameId, row, col, num);
       if (result.valid) {
-        const newBoard = board.map(r => [...r]);
-        newBoard[row][col] = num;
-        setBoard(newBoard);
-        // Clear notes on this cell when a value is placed
-        const newNotes = notes.map(r => r.map(c => [...c]));
-        newNotes[row][col] = [];
-        setNotes(newNotes);
         if (result.completed && result.finalTime != null) {
           setCompleted(true);
           setFinalTime(result.finalTime);
@@ -157,12 +159,20 @@ export function GameProvider({ children }: { children: ReactNode }) {
           if (difficulty) fetchLeaderboard(difficulty);
         }
       } else {
+        // Roll back: server rejected the move
+        const rollback = board.map(r => [...r]);
+        rollback[row][col] = prevValue;
+        setBoard(rollback);
         setErrorMsg('Wrong number! Penalty +' + (result.penalty ?? 30) + 's');
         setTotalPenalty(result.totalPenalty ?? totalPenalty);
         setPenaltyFlash('+' + (result.penalty ?? 30) + 's');
         setTimeout(() => setPenaltyFlash(null), 2000);
       }
     } catch (err: unknown) {
+      // Roll back on network error
+      const rollback = board.map(r => [...r]);
+      rollback[row][col] = prevValue;
+      setBoard(rollback);
       const message = axios.isAxiosError(err) ? err.response?.data?.error : 'Failed to make move.';
       setErrorMsg(message || 'Failed to make move.');
     }
@@ -183,13 +193,19 @@ export function GameProvider({ children }: { children: ReactNode }) {
 
     if (board[row][col] === 0) return;
 
+    // Optimistic clear
+    const prevValue = board[row][col];
+    const newBoard = board.map(r => [...r]);
+    newBoard[row][col] = 0;
+    setBoard(newBoard);
+
     try {
       await apiClearCell(gameId, row, col);
-      const newBoard = board.map(r => [...r]);
-      newBoard[row][col] = 0;
-      setBoard(newBoard);
     } catch {
-      // ignore
+      // Roll back on error
+      const rollback = board.map(r => [...r]);
+      rollback[row][col] = prevValue;
+      setBoard(rollback);
     }
   }, [gameId, completed, selectedCell, initialBoard, board, notes]);
 

@@ -8,7 +8,7 @@ const GAME_TTL = 86400; // 24 hours
 // --- KV Helpers ---
 
 async function getGame(kv: KVNamespace, gameId: string): Promise<GameSession | null> {
-  return await kv.get<GameSession>(`game:${gameId}`, 'json');
+  return await kv.get<GameSession>(`game:${gameId}`, { type: 'json', cacheTtl: 60 });
 }
 
 async function saveGame(kv: KVNamespace, game: GameSession): Promise<void> {
@@ -16,7 +16,7 @@ async function saveGame(kv: KVNamespace, game: GameSession): Promise<void> {
 }
 
 async function getLeaderboardEntries(kv: KVNamespace, difficulty: Difficulty): Promise<LeaderboardEntry[]> {
-  const entries = await kv.get<LeaderboardEntry[]>(`leaderboard:${difficulty}`, 'json');
+  const entries = await kv.get<LeaderboardEntry[]>(`leaderboard:${difficulty}`, { type: 'json', cacheTtl: 60 });
   return entries ?? [];
 }
 
