@@ -16,6 +16,7 @@ export interface GameSession {
   difficulty: Difficulty;
   puzzle: number[][];      // The original puzzle (immutable, used to prevent editing given cells)
   board: number[][];       // Current board state with user entries
+  emptyCells: number;      // Count of remaining empty cells (0 = board is full)
   startTime: number;
   totalPenalty: number;
   completed: boolean;

@@ -49,18 +49,13 @@ function isValidPlacement(board: number[][], row: number, col: number, num: numb
 }
 
 /**
- * Check if the board is a valid completed Sudoku:
- * - All 81 cells filled (no zeros)
- * - Every row contains 1-9 exactly once
- * - Every column contains 1-9 exactly once
- * - Every 3x3 box contains 1-9 exactly once
- * If complete, marks the game as finished and adds to leaderboard.
+ * Validate a fully-filled board against Sudoku rules:
+ * every row, column, and 3x3 box must contain 1-9 exactly once.
+ * Only called when emptyCells === 0 (board is full).
+ * If valid, marks the game as finished and adds to leaderboard.
  */
 async function checkCompletion(kv: KVNamespace, game: GameSession): Promise<{ completed: true; finalTime: number } | { completed: false }> {
   const board = game.board;
-
-  // Check all cells are filled
-  if (!board.every(r => r.every(c => c !== 0))) return { completed: false };
 
   // Check each row has 1-9
   for (let r = 0; r < 9; r++) {
@@ -114,6 +109,7 @@ export async function createGame(kv: KVNamespace, difficulty: Difficulty) {
     difficulty,
     puzzle: puzzle.map(row => [...row]),
     board: puzzle.map(row => [...row]),
+    emptyCells: emptyCount,
     startTime: Date.now(),
     totalPenalty: 0,
     completed: false,
@@ -147,13 +143,19 @@ export async function makeMove(kv: KVNamespace, gameId: string, row: number, col
   game.board[row][col] = value;
   game.undoStack.push({ row, col, prevValue, newValue: value });
   game.redoStack = [];
+  if (prevValue === 0) game.emptyCells--;
 
-  const result = await checkCompletion(kv, game);
-  await saveGame(kv, game);
-
-  if (result.completed) {
-    return { valid: true, completed: true, finalTime: result.finalTime };
+  // Only run full validation when the board is completely filled
+  if (game.emptyCells === 0) {
+    const result = await checkCompletion(kv, game);
+    await saveGame(kv, game);
+    if (result.completed) {
+      return { valid: true, completed: true, finalTime: result.finalTime };
+    }
+    return { valid: true, completed: false };
   }
+
+  await saveGame(kv, game);
   return { valid: true, completed: false };
 }
 
@@ -167,6 +169,7 @@ export async function clearCell(kv: KVNamespace, gameId: string, row: number, co
   if (prevValue === 0) return { success: true };
 
   game.board[row][col] = 0;
+  game.emptyCells++;
   game.undoStack.push({ row, col, prevValue, newValue: 0 });
   game.redoStack = [];
   await saveGame(kv, game);
@@ -182,6 +185,9 @@ export async function undo(kv: KVNamespace, gameId: string) {
   const move = game.undoStack.pop()!;
   game.board[move.row][move.col] = move.prevValue;
   game.redoStack.push(move);
+  // Undo a placement (value→0): emptyCells++. Undo a clear (0→value): emptyCells--.
+  if (move.prevValue === 0 && move.newValue !== 0) game.emptyCells++;
+  if (move.prevValue !== 0 && move.newValue === 0) game.emptyCells--;
   await saveGame(kv, game);
 
   return { success: true, row: move.row, col: move.col, value: move.prevValue };
@@ -196,6 +202,9 @@ export async function redo(kv: KVNamespace, gameId: string) {
   const move = game.redoStack.pop()!;
   game.board[move.row][move.col] = move.newValue;
   game.undoStack.push(move);
+  // Redo a placement (0→value): emptyCells--. Redo a clear (value→0): emptyCells++.
+  if (move.prevValue === 0 && move.newValue !== 0) game.emptyCells--;
+  if (move.prevValue !== 0 && move.newValue === 0) game.emptyCells++;
   await saveGame(kv, game);
 
   return { success: true, row: move.row, col: move.col, value: move.newValue };
