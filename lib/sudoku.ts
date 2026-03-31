@@ -1,6 +1,14 @@
+/**
+ * Generates a Sudoku puzzle.
+ * 1. Fills a complete 9x9 board using backtracking with randomized numbers
+ * 2. Saves the filled board as the solution
+ * 3. Removes `emptyCount` random cells to create the puzzle
+ * Returns both the puzzle (with holes) and the full solution.
+ */
 export function generateSudoku(emptyCount: number = 40) {
   const board = Array.from({ length: 9 }, () => Array(9).fill(0));
 
+  /** Check if placing `num` at (row, col) violates Sudoku rules */
   const isValid = (board: number[][], row: number, col: number, num: number) => {
     for (let i = 0; i < 9; i++) {
       if (board[row][i] === num || board[i][col] === num) return false;
@@ -15,6 +23,7 @@ export function generateSudoku(emptyCount: number = 40) {
     return true;
   };
 
+  /** Recursively fill empty cells using backtracking. Mutates board in place. */
   const solve = (board: number[][]) => {
     for (let row = 0; row < 9; row++) {
       for (let col = 0; col < 9; col++) {
@@ -49,20 +58,3 @@ export function generateSudoku(emptyCount: number = 40) {
 
   return { puzzle: board, solution };
 }
-
-export const checkValidInput = (board: number[][], row: number, col: number, num: number) => {
-  for (let i = 0; i < 9; i++) {
-    if (i !== col && board[row][i] === num) return false;
-    if (i !== row && board[i][col] === num) return false;
-  }
-  const startRow = Math.floor(row / 3) * 3;
-  const startCol = Math.floor(col / 3) * 3;
-  for (let i = 0; i < 3; i++) {
-    for (let j = 0; j < 3; j++) {
-      if ((startRow + i !== row || startCol + j !== col) && board[startRow + i][startCol + j] === num) {
-        return false;
-      }
-    }
-  }
-  return true;
-};
