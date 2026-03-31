@@ -21,5 +21,11 @@
   },
   "observability": {
     "enabled": true
-  }
+  },
+  "kv_namespaces": [
+    {
+      "binding": "SUDOKU_KV",
+      "id": "7a46760859f94c938cfe856857dd9634"
+    }
+  ]
 }
