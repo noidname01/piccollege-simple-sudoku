@@ -1,26 +1,48 @@
-import crypto from 'crypto';
-import { Difficulty } from './constants';
-import { GameSession, LeaderboardEntry, getEmptyCells, getPenaltySeconds } from './config';
-import { generateSudoku } from './sudoku';
+import crypto from "crypto";
+import { Difficulties, Difficulty } from "./constants";
+import {
+  GameSession,
+  LeaderboardEntry,
+  getEmptyCells,
+  getPenaltySeconds,
+} from "./config";
+import { generateSudoku } from "./sudoku";
 
 const GAME_TTL = 86400; // 24 hours
 
 // --- KV Helpers ---
 
-async function getGame(kv: KVNamespace, gameId: string): Promise<GameSession | null> {
-  return await kv.get<GameSession>(`game:${gameId}`, { type: 'json', cacheTtl: 60 });
+async function getGame(
+  kv: KVNamespace,
+  gameId: string,
+): Promise<GameSession | null> {
+  return await kv.get<GameSession>(`game:${gameId}`, {
+    type: "json",
+    cacheTtl: 60,
+  });
 }
 
 async function saveGame(kv: KVNamespace, game: GameSession): Promise<void> {
-  await kv.put(`game:${game.gameId}`, JSON.stringify(game), { expirationTtl: GAME_TTL });
+  await kv.put(`game:${game.gameId}`, JSON.stringify(game), {
+    expirationTtl: GAME_TTL,
+  });
 }
 
-async function getLeaderboardEntries(kv: KVNamespace, difficulty: Difficulty): Promise<LeaderboardEntry[]> {
-  const entries = await kv.get<LeaderboardEntry[]>(`leaderboard:${difficulty}`, { type: 'json', cacheTtl: 60 });
+async function getLeaderboardEntries(
+  kv: KVNamespace,
+  difficulty: Difficulty,
+): Promise<LeaderboardEntry[]> {
+  const entries = await kv.get<LeaderboardEntry[]>(
+    `leaderboard:${difficulty}`,
+    { type: "json", cacheTtl: 60 },
+  );
   return entries ?? [];
 }
 
-async function addLeaderboardEntry(kv: KVNamespace, entry: LeaderboardEntry): Promise<void> {
+async function addLeaderboardEntry(
+  kv: KVNamespace,
+  entry: LeaderboardEntry,
+): Promise<void> {
   const entries = await getLeaderboardEntries(kv, entry.difficulty);
   entries.push(entry);
   entries.sort((a, b) => a.finalTime - b.finalTime);
@@ -31,7 +53,12 @@ async function addLeaderboardEntry(kv: KVNamespace, entry: LeaderboardEntry): Pr
 // --- Validation ---
 
 /** Check if placing `num` at (row, col) violates Sudoku rules */
-function isValidPlacement(board: number[][], row: number, col: number, num: number): boolean {
+function isValidPlacement(
+  board: number[][],
+  row: number,
+  col: number,
+  num: number,
+): boolean {
   for (let i = 0; i < 9; i++) {
     if (i !== col && board[row][i] === num) return false;
     if (i !== row && board[i][col] === num) return false;
@@ -40,7 +67,10 @@ function isValidPlacement(board: number[][], row: number, col: number, num: numb
   const boxCol = Math.floor(col / 3) * 3;
   for (let i = 0; i < 3; i++) {
     for (let j = 0; j < 3; j++) {
-      if ((boxRow + i !== row || boxCol + j !== col) && board[boxRow + i][boxCol + j] === num) {
+      if (
+        (boxRow + i !== row || boxCol + j !== col) &&
+        board[boxRow + i][boxCol + j] === num
+      ) {
         return false;
       }
     }
@@ -54,7 +84,10 @@ function isValidPlacement(board: number[][], row: number, col: number, num: numb
  * Only called when emptyCells === 0 (board is full).
  * If valid, marks the game as finished and adds to leaderboard.
  */
-async function checkCompletion(kv: KVNamespace, game: GameSession): Promise<{ completed: true; finalTime: number } | { completed: false }> {
+async function checkCompletion(
+  kv: KVNamespace,
+  game: GameSession,
+): Promise<{ completed: true; finalTime: number } | { completed: false }> {
   const board = game.board;
 
   // Check each row has 1-9
@@ -107,8 +140,8 @@ export async function createGame(kv: KVNamespace, difficulty: Difficulty) {
   const session: GameSession = {
     gameId,
     difficulty,
-    puzzle: puzzle.map(row => [...row]),
-    board: puzzle.map(row => [...row]),
+    puzzle: puzzle.map((row) => [...row]),
+    board: puzzle.map((row) => [...row]),
     emptyCells: emptyCount,
     startTime: Date.now(),
     totalPenalty: 0,
@@ -121,13 +154,20 @@ export async function createGame(kv: KVNamespace, difficulty: Difficulty) {
   return { gameId, puzzle, difficulty };
 }
 
-export async function makeMove(kv: KVNamespace, gameId: string, row: number, col: number, value: number) {
+export async function makeMove(
+  kv: KVNamespace,
+  gameId: string,
+  row: number,
+  col: number,
+  value: number,
+) {
   const game = await getGame(kv, gameId);
-  if (!game) return { error: 'Game not found', status: 404 };
-  if (game.completed) return { error: 'Game already completed', status: 400 };
-  if (game.puzzle[row][col] !== 0) return { error: 'Cannot modify initial cell', status: 400 };
+  if (!game) return { error: "Game not found", status: 404 };
+  if (game.completed) return { error: "Game already completed", status: 400 };
+  if (game.puzzle[row][col] !== 0)
+    return { error: "Cannot modify initial cell", status: 400 };
   if (row < 0 || row > 8 || col < 0 || col > 8 || value < 1 || value > 9) {
-    return { error: 'Invalid move parameters', status: 400 };
+    return { error: "Invalid move parameters", status: 400 };
   }
 
   // Validate against Sudoku rules
@@ -159,11 +199,17 @@ export async function makeMove(kv: KVNamespace, gameId: string, row: number, col
   return { valid: true, completed: false };
 }
 
-export async function clearCell(kv: KVNamespace, gameId: string, row: number, col: number) {
+export async function clearCell(
+  kv: KVNamespace,
+  gameId: string,
+  row: number,
+  col: number,
+) {
   const game = await getGame(kv, gameId);
-  if (!game) return { error: 'Game not found', status: 404 };
-  if (game.completed) return { error: 'Game already completed', status: 400 };
-  if (game.puzzle[row][col] !== 0) return { error: 'Cannot modify initial cell', status: 400 };
+  if (!game) return { error: "Game not found", status: 404 };
+  if (game.completed) return { error: "Game already completed", status: 400 };
+  if (game.puzzle[row][col] !== 0)
+    return { error: "Cannot modify initial cell", status: 400 };
 
   const prevValue = game.board[row][col];
   if (prevValue === 0) return { success: true };
@@ -178,9 +224,10 @@ export async function clearCell(kv: KVNamespace, gameId: string, row: number, co
 
 export async function undo(kv: KVNamespace, gameId: string) {
   const game = await getGame(kv, gameId);
-  if (!game) return { error: 'Game not found', status: 404 };
-  if (game.completed) return { error: 'Game already completed', status: 400 };
-  if (game.undoStack.length === 0) return { error: 'Nothing to undo', status: 400 };
+  if (!game) return { error: "Game not found", status: 404 };
+  if (game.completed) return { error: "Game already completed", status: 400 };
+  if (game.undoStack.length === 0)
+    return { error: "Nothing to undo", status: 400 };
 
   const move = game.undoStack.pop()!;
   game.board[move.row][move.col] = move.prevValue;
@@ -195,9 +242,10 @@ export async function undo(kv: KVNamespace, gameId: string) {
 
 export async function redo(kv: KVNamespace, gameId: string) {
   const game = await getGame(kv, gameId);
-  if (!game) return { error: 'Game not found', status: 404 };
-  if (game.completed) return { error: 'Game already completed', status: 400 };
-  if (game.redoStack.length === 0) return { error: 'Nothing to redo', status: 400 };
+  if (!game) return { error: "Game not found", status: 404 };
+  if (game.completed) return { error: "Game already completed", status: 400 };
+  if (game.redoStack.length === 0)
+    return { error: "Nothing to redo", status: 400 };
 
   const move = game.redoStack.pop()!;
   game.board[move.row][move.col] = move.newValue;
@@ -212,11 +260,12 @@ export async function redo(kv: KVNamespace, gameId: string) {
 
 export async function getState(kv: KVNamespace, gameId: string) {
   const game = await getGame(kv, gameId);
-  if (!game) return { error: 'Game not found', status: 404 };
+  if (!game) return { error: "Game not found", status: 404 };
 
-  const elapsedTime = game.completed && game.completedTime
-    ? Math.round(((game.completedTime - game.startTime) / 1000) * 10) / 10
-    : Math.round(((Date.now() - game.startTime) / 1000) * 10) / 10;
+  const elapsedTime =
+    game.completed && game.completedTime
+      ? Math.round(((game.completedTime - game.startTime) / 1000) * 10) / 10
+      : Math.round(((Date.now() - game.startTime) / 1000) * 10) / 10;
 
   return {
     gameId: game.gameId,
@@ -228,13 +277,20 @@ export async function getState(kv: KVNamespace, gameId: string) {
   };
 }
 
-export async function getLeaderboard(kv: KVNamespace, difficulty?: Difficulty, limit: number = 10): Promise<LeaderboardEntry[]> {
+export async function getLeaderboard(
+  kv: KVNamespace,
+  difficulty?: Difficulty,
+  limit: number = 10,
+): Promise<LeaderboardEntry[]> {
   if (difficulty) {
     const entries = await getLeaderboardEntries(kv, difficulty);
     return entries.slice(0, limit);
   }
   const all = await Promise.all(
-    (['easy', 'medium', 'hard'] as Difficulty[]).map(d => getLeaderboardEntries(kv, d))
+    Difficulties.map((d) => getLeaderboardEntries(kv, d)),
   );
-  return all.flat().sort((a, b) => a.finalTime - b.finalTime).slice(0, limit);
+  return all
+    .flat()
+    .sort((a, b) => a.finalTime - b.finalTime)
+    .slice(0, limit);
 }

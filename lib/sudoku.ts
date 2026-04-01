@@ -9,7 +9,12 @@ export function generateSudoku(emptyCount: number = 40) {
   const board = Array.from({ length: 9 }, () => Array(9).fill(0));
 
   /** Check if placing `num` at (row, col) violates Sudoku rules */
-  const isValid = (board: number[][], row: number, col: number, num: number) => {
+  const isValid = (
+    board: number[][],
+    row: number,
+    col: number,
+    num: number,
+  ) => {
     for (let i = 0; i < 9; i++) {
       if (board[row][i] === num || board[i][col] === num) return false;
     }
@@ -28,7 +33,9 @@ export function generateSudoku(emptyCount: number = 40) {
     for (let row = 0; row < 9; row++) {
       for (let col = 0; col < 9; col++) {
         if (board[row][col] === 0) {
-          const nums = [1, 2, 3, 4, 5, 6, 7, 8, 9].sort(() => Math.random() - 0.5);
+          const nums = [1, 2, 3, 4, 5, 6, 7, 8, 9].sort(
+            () => Math.random() - 0.5,
+          );
           for (const num of nums) {
             if (isValid(board, row, col, num)) {
               board[row][col] = num;
@@ -44,7 +51,7 @@ export function generateSudoku(emptyCount: number = 40) {
   };
 
   solve(board);
-  const solution = board.map(row => [...row]);
+  // const solution = board.map((row) => [...row]);
 
   let count = emptyCount;
   while (count > 0) {
@@ -56,5 +63,5 @@ export function generateSudoku(emptyCount: number = 40) {
     }
   }
 
-  return { puzzle: board, solution };
+  return { puzzle: board };
 }

@@ -2,7 +2,7 @@
 
 import { Box, Button, Typography } from '@mui/material';
 import { useGame } from '@/contexts/GameContext';
-import { Difficulty, DIFFICULTY_LABELS } from '@/lib/constants';
+import { Difficulties, Difficulty, DIFFICULTY_LABELS } from '@/lib/constants';
 
 const DIFFICULTY_COLORS: Record<Difficulty, string> = {
   easy: '#a855f7',
@@ -31,7 +31,7 @@ export default function DifficultySelect() {
         Select Difficulty
       </Typography>
       <Box display="flex" gap={2}>
-        {(['easy', 'medium', 'hard'] as Difficulty[]).map(diff => (
+        {Difficulties.map(diff => (
           <Button
             key={diff}
             variant="contained"

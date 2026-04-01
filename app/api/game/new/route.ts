@@ -1,18 +1,16 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { getCloudflareContext } from '@opennextjs/cloudflare';
-import { createGame } from '@/lib/gameStore';
-import { Difficulty } from '@/lib/constants';
-
-const VALID_DIFFICULTIES: Difficulty[] = ['easy', 'medium', 'hard'];
+import { NextRequest, NextResponse } from "next/server";
+import { getCloudflareContext } from "@opennextjs/cloudflare";
+import { createGame } from "@/lib/gameStore";
+import { Difficulties, Difficulty } from "@/lib/constants";
 
 export async function POST(req: NextRequest) {
-  const body = await req.json() as { difficulty?: string };
+  const body = (await req.json()) as { difficulty?: string };
   const { difficulty } = body;
 
-  if (!difficulty || !VALID_DIFFICULTIES.includes(difficulty as Difficulty)) {
+  if (!difficulty || !Difficulties.includes(difficulty as Difficulty)) {
     return NextResponse.json(
       { error: 'Invalid difficulty. Must be "easy", "medium", or "hard".' },
-      { status: 400 }
+      { status: 400 },
     );
   }
 

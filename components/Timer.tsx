@@ -6,7 +6,7 @@ import { useGame, formatTime } from '@/contexts/GameContext';
 
 export default function Timer() {
   const { elapsedSeconds, totalPenalty, completed, finalTime, penaltyFlash } = useGame();
-  // When completed, use the server's authoritative finalTime to avoid 1s drift
+  // When completed, use the server's authoritative finalTime
   const displayTime = (completed && finalTime != null) ? Math.round(finalTime) : elapsedSeconds + totalPenalty;
 
   return (
