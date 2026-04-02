@@ -258,25 +258,6 @@ export async function redo(kv: KVNamespace, gameId: string) {
   return { success: true, row: move.row, col: move.col, value: move.newValue };
 }
 
-export async function getState(kv: KVNamespace, gameId: string) {
-  const game = await getGame(kv, gameId);
-  if (!game) return { error: "Game not found", status: 404 };
-
-  const elapsedTime =
-    game.completed && game.completedTime
-      ? Math.round(((game.completedTime - game.startTime) / 1000) * 10) / 10
-      : Math.round(((Date.now() - game.startTime) / 1000) * 10) / 10;
-
-  return {
-    gameId: game.gameId,
-    board: game.board,
-    difficulty: game.difficulty,
-    elapsedTime,
-    totalPenalty: game.totalPenalty,
-    completed: game.completed,
-  };
-}
-
 export async function getLeaderboard(
   kv: KVNamespace,
   difficulty?: Difficulty,

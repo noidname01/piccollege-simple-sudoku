@@ -20,15 +20,6 @@ export interface ClearResponse {
   success: boolean;
 }
 
-export interface GameStateResponse {
-  gameId: string;
-  board: number[][];
-  difficulty: Difficulty;
-  elapsedTime: number;
-  totalPenalty: number;
-  completed: boolean;
-}
-
 const api = axios.create({ baseURL: "/api/game" });
 
 export function createGame(difficulty: Difficulty) {
@@ -52,10 +43,6 @@ export function clearCell(gameId: string, row: number, col: number) {
   return api
     .post<ClearResponse>(`/${gameId}/clear`, { row, col })
     .then((res) => res.data);
-}
-
-export function getGameState(gameId: string) {
-  return api.get<GameStateResponse>(`/${gameId}/state`).then((res) => res.data);
 }
 
 export interface UndoRedoResponse {
