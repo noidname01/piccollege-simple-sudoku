@@ -15,15 +15,15 @@ export function formatTime(seconds: number): string {
 interface GameState {
   gameId: string | null;
   difficulty: Difficulty | null;
-  board: number[][];
-  initialBoard: number[][];
+  board: number[][];        // Current board state with user entries
+  initialBoard: number[][]; // The original puzzle (immutable, used to prevent editing given cells)
   elapsedSeconds: number;
   totalPenalty: number;
   completed: boolean;
   finalTime: number | null;
   errorMsg: string | null;
   penaltyFlash: string | null;
-  selectedCell: [number, number] | null;
+  selectedCell: [number, number] | null; // [row, col] of currently selected cell
   leaderboardData: LeaderboardEntry[];
   notes: number[][][]; // 9x9 array of number arrays
   noteMode: boolean;

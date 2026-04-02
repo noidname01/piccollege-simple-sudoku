@@ -59,10 +59,12 @@ function isValidPlacement(
   col: number,
   num: number,
 ): boolean {
+  // Same Row or Same Column
   for (let i = 0; i < 9; i++) {
     if (i !== col && board[row][i] === num) return false;
     if (i !== row && board[i][col] === num) return false;
   }
+  // Same 3x3 Box
   const boxRow = Math.floor(row / 3) * 3;
   const boxCol = Math.floor(col / 3) * 3;
   for (let i = 0; i < 3; i++) {
