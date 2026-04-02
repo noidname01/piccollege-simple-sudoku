@@ -66,8 +66,8 @@ function isValidPlacement(
   }
   // Same 3x3 Box
   const boxRow = Math.floor(row / 3) * 3;
-  const boxCol = Math.floor(col / 3) * 3;
-  for (let i = 0; i < 3; i++) {
+  const boxCol = Math.floor(col / 2) * 2;
+  for (let i = 0; i < 2; i++) {
     for (let j = 0; j < 3; j++) {
       if (
         (boxRow + i !== row || boxCol + j !== col) &&
@@ -93,28 +93,28 @@ async function checkCompletion(
   const board = game.board;
 
   // Check each row has 1-9
-  for (let r = 0; r < 9; r++) {
+  for (let r = 0; r < 6; r++) {
     const seen = new Set(board[r]);
-    if (seen.size !== 9) return { completed: false };
+    if (seen.size !== 6) return { completed: false };
   }
 
   // Check each column has 1-9
-  for (let c = 0; c < 9; c++) {
+  for (let c = 0; c < 6; c++) {
     const seen = new Set<number>();
-    for (let r = 0; r < 9; r++) seen.add(board[r][c]);
-    if (seen.size !== 9) return { completed: false };
+    for (let r = 0; r < 6; r++) seen.add(board[r][c]);
+    if (seen.size !== 6) return { completed: false };
   }
 
   // Check each 3x3 box has 1-9
   for (let boxR = 0; boxR < 3; boxR++) {
-    for (let boxC = 0; boxC < 3; boxC++) {
+    for (let boxC = 0; boxC < 2; boxC++) {
       const seen = new Set<number>();
-      for (let r = 0; r < 3; r++) {
+      for (let r = 0; r < 2; r++) {
         for (let c = 0; c < 3; c++) {
-          seen.add(board[boxR * 3 + r][boxC * 3 + c]);
+          seen.add(board[boxR * 3 + r][boxC * 2 + c]);
         }
       }
-      if (seen.size !== 9) return { completed: false };
+      if (seen.size !== 6) return { completed: false };
     }
   }
 
@@ -168,7 +168,7 @@ export async function makeMove(
   if (game.completed) return { error: "Game already completed", status: 400 };
   if (game.puzzle[row][col] !== 0)
     return { error: "Cannot modify initial cell", status: 400 };
-  if (row < 0 || row > 8 || col < 0 || col > 8 || value < 1 || value > 9) {
+  if (row < 0 || row > 5 || col < 0 || col > 5 || value < 1 || value > 6) {
     return { error: "Invalid move parameters", status: 400 };
   }
 

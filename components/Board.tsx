@@ -22,8 +22,8 @@ export default function Board() {
       setPrevBoard(board.map(r => [...r]));
       return;
     }
-    for (let r = 0; r < 9; r++) {
-      for (let c = 0; c < 9; c++) {
+    for (let r = 0; r < 6; r++) {
+      for (let c = 0; c < 6; c++) {
         if (board[r]?.[c] !== prevBoard[r]?.[c] && board[r]?.[c] !== 0) {
           setPopCell(`${r}-${c}`);
           setTimeout(() => setPopCell(null), 300);
@@ -89,8 +89,8 @@ export default function Board() {
       {/* Board grid */}
       <Box
         display="grid"
-        gridTemplateColumns={`repeat(9, ${CELL_SIZE}px)`}
-        gridTemplateRows={`repeat(9, ${CELL_SIZE}px)`}
+        gridTemplateColumns={`repeat(6, ${CELL_SIZE}px)`}
+        gridTemplateRows={`repeat(6, ${CELL_SIZE}px)`}
         gap="1px"
         sx={{
           backgroundColor: '#d8b4fe',
@@ -106,16 +106,16 @@ export default function Board() {
             const isHighlighted = selectedCell && !isSelected && (
               selectedCell[0] === rowIndex || selectedCell[1] === colIndex ||
               (Math.floor(selectedCell[0] / 3) === Math.floor(rowIndex / 3) &&
-               Math.floor(selectedCell[1] / 3) === Math.floor(colIndex / 3))
+                Math.floor(selectedCell[1] / 2) === Math.floor(colIndex / 2))
             );
             const cellKey = `${rowIndex}-${colIndex}`;
             const cellNotes = notes[rowIndex][colIndex];
             const showNotes = cell === 0 && cellNotes.length > 0;
             const isPop = popCell === cellKey;
 
-            // Thicker borders at 3x3 box boundaries (gap handles normal borders)
-            const borderRight = (colIndex % 3 === 2 && colIndex < 8) ? '2px solid #7e22ce' : 'none';
-            const borderBottom = (rowIndex % 3 === 2 && rowIndex < 8) ? '2px solid #7e22ce' : 'none';
+            // Thicker borders at 2x3 box boundaries (gap handles normal borders)
+            const borderRight = (colIndex % 3 === 2 && colIndex < 5) ? '2px solid #7e22ce' : 'none';
+            const borderBottom = (rowIndex % 2 === 1 && rowIndex < 5) ? '2px solid #7e22ce' : 'none';
 
             let bgColor = isInitial ? '#ede4ff' : '#ffffff';
             if (isSelected) bgColor = '#d8b4fe';
@@ -155,7 +155,7 @@ export default function Board() {
                     alignItems: 'center',
                     justifyItems: 'center',
                   }}>
-                    {[1, 2, 3, 4, 5, 6, 7, 8, 9].map(n => (
+                    {[1, 2, 3, 4, 5, 6].map(n => (
                       <span
                         key={n}
                         style={{

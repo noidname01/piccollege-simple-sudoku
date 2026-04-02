@@ -9,7 +9,6 @@ A single-player Sudoku game built with Next.js (App Router), React, and Material
 - **Move validation**: Server-side Sudoku rule checking (row, column, 3x3 box)
 - **Penalty system**: Invalid moves and hints add time penalties
 - **Undo / Redo**: Full move history with keyboard shortcuts (Ctrl+Z / Ctrl+Shift+Z)
-- **Hints**: Reveal a random cell with a configurable time penalty
 - **Notes / Pencil marks**: Toggle note mode to mark candidate numbers per cell
 - **Leaderboard**: Top 10 scores per difficulty level
 
@@ -58,7 +57,7 @@ components/
   DifficultySelect.tsx       # Difficulty picker screen
   GameView.tsx               # Game layout: header, timer, board + leaderboard, error snackbar
   Board.tsx                  # 9x9 Sudoku grid with cell selection and notes display
-  NumberPad.tsx              # Number buttons (1-9), undo/redo, hint, clear, new game
+  NumberPad.tsx              # Number buttons (1-9), undo/redo, clear, new game
   Timer.tsx                  # Timer display with penalty flash
   Leaderboard.tsx            # Ranking table (top 10 per difficulty)
 

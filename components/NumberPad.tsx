@@ -21,7 +21,7 @@ export default function NumberPad() {
     <Box display="flex" flexDirection="column" alignItems="center" gap={1.5}>
       {/* Number buttons */}
       <Box display="flex" gap={0.5}>
-        {[1, 2, 3, 4, 5, 6, 7, 8, 9].map(num => (
+        {[1, 2, 3, 4, 5, 6].map(num => (
           <Button
             key={num}
             variant="outlined"
